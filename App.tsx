@@ -1,131 +1,142 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useEffect, useState} from 'react';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {useSelector, useDispatch} from 'react-redux';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import FirstScreen from './source/screens/FirstScreen';
+import {setNavnameis} from './redux/slice/NavigationStateSlice';
+import SignIn from './source/screens/AuthPages/SignIn';
+import SignUp from './source/screens/AuthPages/SignUp';
+import ProfilePage from './source/screens/CommonScreens/ProfilePage';
+import OwnerHomePage from './source/screens/OwnerDrawerScreens/OwnerHomePage';
+import NotificationPage from './source/screens/CommonScreens/NotificationPage';
+import HistoryPage from './source/screens/CommonScreens/HistoryPage';
+import AssignDeliveries from './source/screens/OwnerDrawerScreens/AssignDeliveries';
+import RealTimeMap from './source/screens/OwnerDrawerScreens/RealTimeMap';
+import AssignedDeliveries from './source/screens/DriveDrawerScreens/AssignedDeliveries';
+import DriverHomePage from './source/screens/DriveDrawerScreens/DriverHomePage';
+import { Poppins_Bold, theme_clr_10, theme_clr_medium_grey } from './style_sheet/styles';
+import CustomDrawer from './CustomNavigations/CustomDrawer';
+import IconComponent from './source/My_components/Icon_Component/IconComponent';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+const handleIcons=(name,icon,isfocused)=>{
+return(
+  <IconComponent name={name} icon={icon} size={18} color={isfocused?theme_clr_10:theme_clr_medium_grey} />
+)
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const AuthPages = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+      }}
+      initialRouteName="SignIn">
+      <Stack.Screen name="SignIn" component={SignIn} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+    </Stack.Navigator>
+  );
+};
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+const DrawerTabs = ({screentype}) => {
+  return (
+    <Drawer.Navigator
+    drawerContent={(props) => <CustomDrawer {...props} />}
+    screenOptions={{
+      headerShown: false,
+      drawerActiveTintColor: theme_clr_10,  // Active item color
+      drawerInactiveTintColor: '#555',   // Inactive item color
+      drawerLabelStyle: {
+        fontSize: 16,
+        fontFamily:Poppins_Bold,
+        marginVertical:-10,
+        fontWeight: 'bold',
+      },
+      drawerStyle: {
+        backgroundColor: '#F8F9FA', // Drawer background color
+        width: 250,
+      },
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
+      drawerItemStyle: {
+        borderRadius: 8,
+        marginVertical:5,
+
+      },
+    }}
+    >
+                {/* <Drawer.Screen name="Real Time Map" component={RealTimeMap}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('Ionicons','map',focused)}} />
+    */}
+      {screentype == 'ownerscreens' && (
+        <>
+          <Drawer.Screen name="Home" component={OwnerHomePage} 
+           options={{drawerIcon: ({focused, color, size }) =>handleIcons('Entypo','home',focused)}}/>
+          <Drawer.Screen name="Profile" component={ProfilePage}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('FontAwesome','user',focused)}} />
+          <Drawer.Screen name="Notification" component={NotificationPage}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('Ionicons','notifications',focused)}} />
+          <Drawer.Screen name="Assign Deliveries" component={AssignDeliveries}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('MaterialIcons','assignment',focused)}} />
+          <Drawer.Screen name="History" component={HistoryPage}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('MaterialIcons','history',focused)}} />
+
+        </>
+      )}
+      {screentype == 'driverscreens' && (
+        <>
+          <Drawer.Screen name="Home" component={DriverHomePage}
+           options={{drawerIcon: ({focused, color, size }) =>handleIcons('Entypo','home',focused)}}/>
+          <Drawer.Screen name="Profile" component={ProfilePage}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('FontAwesome','user',focused)}} />
+          <Drawer.Screen name="Notification" component={NotificationPage}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('Ionicons','notifications',focused)}} />
+          <Drawer.Screen name="Assigned Deliveries" component={AssignedDeliveries}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('MaterialIcons','assignment',focused)}} />
+          <Drawer.Screen name="History" component={HistoryPage}
+          options={{drawerIcon: ({focused, color, size }) =>handleIcons('MaterialIcons','history',focused)}} />
+        </>
+      )}
+    </Drawer.Navigator>
+  );
+};
+
+// Main App
+
+export default function App() {
+  const navname = useSelector(state => state.navnameis.navname);
+  const dispatch = useDispatch();
+
+  console.log(navname);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(setNavnameis('auth'));
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
+    <NavigationContainer>
+      {navname === 'auth' ? (
+        <AuthPages />
+      ) : navname === 'driverscreens' || navname === 'ownerscreens' ? (
+        <DrawerTabs screentype={navname} />
+      ) : (
+
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            animation: 'none',
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </View>
+          <Stack.Screen name="FirstScreen" component={FirstScreen} />
+        </Stack.Navigator>
+      )}
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
